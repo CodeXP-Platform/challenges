@@ -35,6 +35,10 @@ spring:
           initial-interval: 3s
           max-retries: 3
 
+app:
+  jwt:
+    secret: ${JWT_SECRET:mysecretkey}
+
 # Eureka Config
 eureka:
   instance:
