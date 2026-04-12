@@ -22,6 +22,10 @@ public class Challenge extends AbstractEntity {
     private ChallengeDescription description;
 
     @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "entryFunctionName"))
+    private EntryFunctionName entryFunctionName;
+
+    @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "authorId"))
     private AuthorId authorId;
 
