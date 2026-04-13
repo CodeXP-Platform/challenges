@@ -10,13 +10,9 @@ import com.codexp.challengessolutions.shared.domain.model.valueobjects.JwtPrinci
 public class UserContext {
 
 	public JwtPrincipal getPrincipal() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication == null || !authentication.isAuthenticated()) {
-			throw new IllegalStateException("No authenticated user found in security context");
-		}
-
+		Authentication authentication = getAuthentication();
 		Object principal = authentication.getPrincipal();
+
 		if (principal instanceof JwtPrincipal jwtPrincipal) {
 			return jwtPrincipal;
 		}
@@ -26,5 +22,15 @@ public class UserContext {
 
 	public String getUserId() {
 		return getPrincipal().userId();
+	}
+
+	private Authentication getAuthentication() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null || !authentication.isAuthenticated()) {
+			throw new IllegalStateException("No authenticated user found in security context");
+		}
+
+		return authentication;
 	}
 }
