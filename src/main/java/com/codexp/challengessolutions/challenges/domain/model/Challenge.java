@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class Challenge extends AbstractEntity {
 
     @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "challenge_id"))
     private ChallengeId id;
 
     @Embedded
