@@ -21,7 +21,7 @@ public class UserContext {
 	}
 
 	public String getUserId() {
-		return getPrincipal().userId();
+		return getPrincipal().userId().value();
 	}
 
 	private Authentication getAuthentication() {

@@ -12,10 +12,15 @@ public enum UserRole {
             throw new IllegalArgumentException("Role claim is missing");
         }
 
-        return UserRole.valueOf(rawRole.trim().toUpperCase(Locale.ROOT));
+        String normalized = rawRole.trim().toUpperCase(Locale.ROOT);
+        if (!normalized.startsWith("ROLE_")) {
+            normalized = "ROLE_" + normalized;
+        }
+
+        return UserRole.valueOf(normalized);
     }
 
     public String asAuthority() {
-        return "ROLE_" + name();
+        return name();
     }
 }

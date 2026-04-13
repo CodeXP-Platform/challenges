@@ -50,15 +50,9 @@ public class ChallengeController {
 
         var challengeId = challengeCommandService.handle(command);
 
-        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(challengeId);
+        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(challengeId, jwt.userId());
 
-        var result = challengeQueryService.handle(query);
-
-        if (result.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        var challenge = result.get();
+        var challenge = challengeQueryService.handle(query);
 
         var response = ChallengeAssembler.toResponseFromEntity(challenge);
 

@@ -57,4 +57,13 @@ public class Challenge extends AbstractEntity {
 
         return challenge;
     }
+
+    public boolean isOwnedBy(AuthorId author) {
+        return authorId.equals(author);
+    }
+
+    public boolean isPublished() {
+        return isPublished;
+    }
+
 }

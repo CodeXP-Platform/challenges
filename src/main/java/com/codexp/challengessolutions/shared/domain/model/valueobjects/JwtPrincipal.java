@@ -1,8 +1,8 @@
 package com.codexp.challengessolutions.shared.domain.model.valueobjects;
 
 public record JwtPrincipal(
-    String userId,
-    String nickname,
-    String email,
+    UserId userId,
+    NickName nickname,
+    UserEmail email,
     UserRole role
 ) {}

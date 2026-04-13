@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.codexp.challengessolutions.shared.domain.model.valueobjects.JwtPrincipal;
+import com.codexp.challengessolutions.shared.domain.model.valueobjects.NickName;
 import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserRole;
+import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserEmail;
+import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserId;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -66,7 +69,12 @@ public class JwtUtils {
             String email = claims.get("email", String.class);
             UserRole role = UserRole.fromClaim(claims.get("role", String.class));
 
-            return Optional.of(new JwtPrincipal(userId, nickname, email, role));
+            return Optional.of(new JwtPrincipal(
+                    UserId.fromString(userId),
+                    NickName.fromString(nickname),
+                    UserEmail.fromString(email),
+                    role
+            ));
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }

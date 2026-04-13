@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface ChallengeQueryService {
     List<Challenge> handle(GetAllChallengesQuery query);
 
-    Optional<Challenge> handle(GetChallengeByIdQuery query);
+    Challenge handle(GetChallengeByIdQuery query);
 
     List<Challenge> handle(GetChallengesByTitleQuery query);
 

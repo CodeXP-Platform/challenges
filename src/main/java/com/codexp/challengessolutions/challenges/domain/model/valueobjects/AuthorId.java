@@ -1,5 +1,6 @@
 package com.codexp.challengessolutions.challenges.domain.model.valueobjects;
 
+import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserId;
 import jakarta.persistence.Embeddable;
 
 import java.util.UUID;
@@ -17,6 +18,14 @@ public record AuthorId(UUID value) {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid Author ID format. Must be a valid UUID.", e);
         }
+    }
+
+    public static AuthorId fromUUID(UUID authorId) {
+        return new AuthorId(authorId);
+    }
+
+    public static AuthorId fromUserId(UserId userId) {
+        return fromString(userId.toString());
     }
 
     @Override
