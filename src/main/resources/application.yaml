@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${APP_NAME:challenges_and_solutions}
+    name: ${APP_NAME:challenges-and-solutions}
 
   # PostgreSQL
   datasource:
@@ -44,7 +44,7 @@ eureka:
   instance:
     # When using Docker/k8s then true
     prefer-ip-address: ${EUREKA_PREFER_IP:true}
-    instance-id: ${spring.application.name}:${random.value}
+    instance-id: ${spring.application.name}:${server.port}
   client:
     register-with-eureka: ${EUREKA_REGISTER:true}
     fetch-registry: ${EUREKA_FETCH:true}
@@ -59,4 +59,4 @@ management:
         include: health, info
   endpoint:
     health:
-      show-details: always
+      show-details: never
