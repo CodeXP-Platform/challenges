@@ -1,10 +1,10 @@
-package com.codexp.challengessolutions;
+package com.codexp.challenges;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ChallengesSolutionsApplicationTests {
+class ChallengesApplicationTests {
 
     @Test
     void contextLoads() {

@@ -1,4 +1,4 @@
-package com.codexp.challengessolutions.shared.infrastructure.config;
+package com.codexp.challenges.shared.infrastructure.config;
 
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

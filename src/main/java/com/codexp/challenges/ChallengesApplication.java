@@ -1,4 +1,4 @@
-package com.codexp.challengessolutions;
+package com.codexp.challenges;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class ChallengesSolutionsApplication {
+public class ChallengesApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ChallengesSolutionsApplication.class, args);
+        SpringApplication.run(ChallengesApplication.class, args);
     }
 
 }
