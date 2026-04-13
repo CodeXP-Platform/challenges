@@ -12,10 +12,10 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.codexp</groupId>
-    <artifactId>challenges-solutions</artifactId>
+    <artifactId>challenges</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>challenges-solutions</name>
-    <description>challenges-solutions</description>
+    <name>challenges</name>
+    <description>challenges</description>
     <url />
     <licenses>
         <license />

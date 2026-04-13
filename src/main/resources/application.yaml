@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${APP_NAME:challenges-and-solutions}
+    name: ${APP_NAME:challenges}
 
   # PostgreSQL
   datasource:
