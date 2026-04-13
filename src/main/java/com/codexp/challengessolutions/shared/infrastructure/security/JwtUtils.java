@@ -1,5 +1,12 @@
 package com.codexp.challengessolutions.shared.infrastructure.security;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
+import javax.crypto.SecretKey;
+
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.codexp.challengessolutions.shared.domain.model.valueobjects.JwtPrincipal;
@@ -7,20 +14,31 @@ import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserRole;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
-
-import java.util.Optional;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 
 @Component
+@Getter
 public class JwtUtils {
 
-    private final JwtTokenReader tokenReader;
-
-    public JwtUtils(JwtTokenReader tokenReader) {
-        this.tokenReader = tokenReader;
-    }
+    @Value("${app.jwt.secret}")
+    private String jwtSecret;
 
     public Claims extractAllClaims(String token) {
-        return tokenReader.readClaims(token);
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private SecretKey getSigningKey() {
+        try {
+            return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        } catch (IllegalArgumentException ignored) {
+            return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     public String extractUserId(String token) {
@@ -28,15 +46,15 @@ public class JwtUtils {
     }
 
     public String extractNickname(String token) {
-        return extractAllClaims(token).get(JwtClaimNames.NICKNAME, String.class);
+        return extractAllClaims(token).get("nickname", String.class);
     }
 
     public String extractEmail(String token) {
-        return extractAllClaims(token).get(JwtClaimNames.EMAIL, String.class);
+        return extractAllClaims(token).get("email", String.class);
     }
 
     public UserRole extractRole(String token) {
-        return UserRole.fromClaim(extractAllClaims(token).get(JwtClaimNames.ROLE, String.class));
+        return UserRole.fromClaim(extractAllClaims(token).get("role", String.class));
     }
 
     public Optional<JwtPrincipal> extractPrincipal(String token) {
@@ -44,9 +62,9 @@ public class JwtUtils {
             Claims claims = extractAllClaims(token);
 
             String userId = claims.getSubject();
-            String nickname = claims.get(JwtClaimNames.NICKNAME, String.class);
-            String email = claims.get(JwtClaimNames.EMAIL, String.class);
-            UserRole role = UserRole.fromClaim(claims.get(JwtClaimNames.ROLE, String.class));
+            String nickname = claims.get("nickname", String.class);
+            String email = claims.get("email", String.class);
+            UserRole role = UserRole.fromClaim(claims.get("role", String.class));
 
             return Optional.of(new JwtPrincipal(userId, nickname, email, role));
         } catch (JwtException | IllegalArgumentException e) {

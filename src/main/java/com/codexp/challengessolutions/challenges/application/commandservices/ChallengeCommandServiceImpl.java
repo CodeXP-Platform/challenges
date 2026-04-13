@@ -24,7 +24,7 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
     @Override
     public ChallengeId handle(CreateChallengeCommand command) {
 
-        if (command.authorRole().equals(UserRole.STUDENT)) {
+        if (command.authorRole().equals(UserRole.ROLE_STUDENT)) {
             throw new UnauthorizedActionException("Only teachers can create challenges");
         }
 

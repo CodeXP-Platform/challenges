@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,11 +24,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final JwtProperties jwtProperties;
 
-    public JwtAuthFilter(JwtUtils jwtUtils, JwtProperties jwtProperties) {
+    public JwtAuthFilter(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
-        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -68,8 +67,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String resolveBearerToken(HttpServletRequest request) {
-        String authHeader = request.getHeader(jwtProperties.getHeader());
-        String prefix = jwtProperties.getPrefix();
+        String authHeader = request.getHeader("Authorization");
+        String prefix = "Bearer ";
 
         if (authHeader == null || !authHeader.startsWith(prefix)) {
             return null;
