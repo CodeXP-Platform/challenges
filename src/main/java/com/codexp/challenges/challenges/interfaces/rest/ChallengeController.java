@@ -79,7 +79,19 @@ public class ChallengeController {
         @PathVariable UUID id,
         @RequestBody UpdateChallengeRequest request
     ) {
-        return ResponseEntity.ok(null);
+        var jwt = userContext.getPrincipal();
+
+        var command =
+            ChallengeCommandAssembler.toUpdateChallengeCommandFromRequest(
+                request,
+                jwt.userId().value(),
+                id.toString()
+            );
+
+        var challenge = challengeCommandService.handle(command);
+        var response = ChallengeAssembler.toResponseFromEntity(challenge);
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

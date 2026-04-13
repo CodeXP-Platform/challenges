@@ -3,6 +3,7 @@ package com.codexp.challenges.challenges.domain.model;
 import com.codexp.challenges.challenges.domain.model.valueobjects.*;
 import com.codexp.challenges.shared.domain.model.AbstractEntity;
 import jakarta.persistence.*;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -65,6 +66,18 @@ public class Challenge extends AbstractEntity {
 
     public boolean isPublished() {
         return isPublished;
+    }
+
+    public void updatePartially(
+            Optional<ChallengeTitle> title,
+            Optional<ChallengeDescription> description,
+            Optional<ChallengeDifficulty> difficulty,
+            Optional<RewardPoints> rewardPoints
+    ) {
+        title.ifPresent(value -> this.title = value);
+        description.ifPresent(value -> this.description = value);
+        difficulty.ifPresent(value -> this.difficulty = value);
+        rewardPoints.ifPresent(value -> this.rewardPoints = value);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.codexp.challenges.challenges.application.commandservices;
 
+import com.codexp.challenges.challenges.domain.exceptions.ChallengeNotFoundException;
 import com.codexp.challenges.challenges.domain.model.Challenge;
 import com.codexp.challenges.challenges.domain.model.commands.CreateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.PublishChallengeCommand;
@@ -46,7 +47,30 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
     @Override
     public Challenge handle(UpdateChallengeCommand command) {
-        return null;
+        if (!command.hasChanges()) {
+            throw new IllegalArgumentException(
+                "At least one challenge field must be provided for update"
+            );
+        }
+
+        var challenge = challengeRepository
+            .findById(command.challengeId())
+            .orElseThrow(ChallengeNotFoundException::new);
+
+        if (!challenge.isOwnedBy(command.authorId())) {
+            throw new UnauthorizedActionException(
+                "Only the challenge owner can update it"
+            );
+        }
+
+        challenge.updatePartially(
+            command.title(),
+            command.description(),
+            command.difficulty(),
+            command.rewardPoints()
+        );
+
+        return challengeRepository.save(challenge);
     }
 
     @Override
