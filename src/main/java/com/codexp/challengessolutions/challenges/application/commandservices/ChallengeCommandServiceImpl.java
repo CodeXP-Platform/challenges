@@ -4,6 +4,7 @@ import com.codexp.challengessolutions.challenges.domain.model.Challenge;
 import com.codexp.challengessolutions.challenges.domain.model.commands.CreateChallengeCommand;
 import com.codexp.challengessolutions.challenges.domain.model.commands.PublishChallengeCommand;
 import com.codexp.challengessolutions.challenges.domain.model.commands.UpdateChallengeCommand;
+import com.codexp.challengessolutions.challenges.domain.model.valueobjects.ChallengeId;
 import com.codexp.challengessolutions.challenges.domain.services.ChallengeCommandService;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Service;
 public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
     @Override
-    public Challenge handle(CreateChallengeCommand command) {
+    public ChallengeId handle(CreateChallengeCommand command) {
+        
         return null;
     }
 
