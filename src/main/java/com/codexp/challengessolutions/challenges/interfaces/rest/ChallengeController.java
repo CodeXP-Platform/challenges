@@ -9,9 +9,7 @@ import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.Ch
 import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.ChallengeCommandAssembler;
 import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.ChallengeQueryAssembler;
 import com.codexp.challengessolutions.shared.application.UserContext;
-
 import java.util.UUID;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -27,9 +25,9 @@ public class ChallengeController {
     private final UserContext userContext;
 
     public ChallengeController(
-            ChallengeCommandService challengeCommandService,
-            ChallengeQueryService challengeQueryService,
-            UserContext userContext
+        ChallengeCommandService challengeCommandService,
+        ChallengeQueryService challengeQueryService,
+        UserContext userContext
     ) {
         this.challengeCommandService = challengeCommandService;
         this.challengeQueryService = challengeQueryService;
@@ -38,25 +36,29 @@ public class ChallengeController {
 
     @PostMapping
     public ResponseEntity<ChallengeResponse> create(
-            @RequestBody CreateChallengeRequest request
+        @RequestBody CreateChallengeRequest request
     ) {
         var jwt = userContext.getPrincipal();
 
-        var command = ChallengeCommandAssembler.toCreateChallengeCommandFromRequest(
+        var command =
+            ChallengeCommandAssembler.toCreateChallengeCommandFromRequest(
                 request,
                 jwt.userId(),
                 jwt.role()
-        );
+            );
 
         var challengeId = challengeCommandService.handle(command);
 
-        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(challengeId, jwt.userId());
+        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(
+            challengeId,
+            jwt.userId()
+        );
 
         var challenge = challengeQueryService.handle(query);
 
         var response = ChallengeAssembler.toResponseFromEntity(challenge);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.created(response);
     }
 
     @GetMapping("/{id}")
@@ -66,15 +68,15 @@ public class ChallengeController {
 
     @GetMapping
     public ResponseEntity<Page<ChallengeResponse>> findAll(
-            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
+        @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
         return ResponseEntity.ok(null);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ChallengeResponse> update(
-            @PathVariable UUID id,
-            @RequestBody UpdateChallengeRequest request
+        @PathVariable UUID id,
+        @RequestBody UpdateChallengeRequest request
     ) {
         return ResponseEntity.ok(null);
     }
