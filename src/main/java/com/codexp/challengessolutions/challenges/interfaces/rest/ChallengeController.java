@@ -1,8 +1,5 @@
 package com.codexp.challengessolutions.challenges.interfaces.rest;
 
-import java.util.UUID;
-
-import com.codexp.challengessolutions.challenges.domain.model.valueobjects.ChallengeId;
 import com.codexp.challengessolutions.challenges.domain.services.ChallengeCommandService;
 import com.codexp.challengessolutions.challenges.domain.services.ChallengeQueryService;
 import com.codexp.challengessolutions.challenges.interfaces.rest.requests.CreateChallengeRequest;
@@ -11,7 +8,9 @@ import com.codexp.challengessolutions.challenges.interfaces.rest.responses.Chall
 import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.ChallengeAssembler;
 import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.ChallengeCommandAssembler;
 import com.codexp.challengessolutions.challenges.interfaces.rest.transformers.ChallengeQueryAssembler;
-import com.codexp.challengessolutions.shared.infrastructure.security.JwtUtils;
+import com.codexp.challengessolutions.shared.application.UserContext;
+
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,20 +24,29 @@ public class ChallengeController {
 
     private final ChallengeCommandService challengeCommandService;
     private final ChallengeQueryService challengeQueryService;
-    private final JwtUtils jwtUtils;
+    private final UserContext userContext;
 
-    public ChallengeController(ChallengeCommandService challengeCommandService, ChallengeQueryService challengeQueryService, JwtUtils jwtUtils) {
+    public ChallengeController(
+            ChallengeCommandService challengeCommandService,
+            ChallengeQueryService challengeQueryService,
+            UserContext userContext
+    ) {
         this.challengeCommandService = challengeCommandService;
         this.challengeQueryService = challengeQueryService;
-        this.jwtUtils = jwtUtils;
+        this.userContext = userContext;
     }
 
     @PostMapping
-    public ResponseEntity<ChallengeResponse> create(@RequestBody CreateChallengeRequest request) {
+    public ResponseEntity<ChallengeResponse> create(
+            @RequestBody CreateChallengeRequest request
+    ) {
+        var jwt = userContext.getPrincipal();
 
-        var userId = jwtUtils.extractUserId()
-
-        var command = ChallengeCommandAssembler.toCreateChallengeCommandFromRequest(request, null);
+        var command = ChallengeCommandAssembler.toCreateChallengeCommandFromRequest(
+                request,
+                jwt.userId(),
+                jwt.role()
+        );
 
         var challengeId = challengeCommandService.handle(command);
 
@@ -51,7 +59,7 @@ public class ChallengeController {
         }
 
         var challenge = result.get();
-        
+
         var response = ChallengeAssembler.toResponseFromEntity(challenge);
 
         return ResponseEntity.ok(response);
@@ -64,15 +72,15 @@ public class ChallengeController {
 
     @GetMapping
     public ResponseEntity<Page<ChallengeResponse>> findAll(
-        @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
         return ResponseEntity.ok(null);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ChallengeResponse> update(
-        @PathVariable UUID id,
-        @RequestBody UpdateChallengeRequest request
+            @PathVariable UUID id,
+            @RequestBody UpdateChallengeRequest request
     ) {
         return ResponseEntity.ok(null);
     }

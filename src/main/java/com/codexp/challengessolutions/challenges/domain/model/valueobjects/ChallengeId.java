@@ -22,4 +22,8 @@ public record ChallengeId(UUID value) {
     public String toString() {
         return value.toString();
     }
+
+    public static ChallengeId generate() {
+        return new ChallengeId(UUID.randomUUID());
+    }
 }

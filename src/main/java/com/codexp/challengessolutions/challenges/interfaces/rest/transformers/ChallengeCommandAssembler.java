@@ -5,17 +5,20 @@ import com.codexp.challengessolutions.challenges.domain.model.commands.UpdateCha
 import com.codexp.challengessolutions.challenges.domain.model.valueobjects.*;
 import com.codexp.challengessolutions.challenges.interfaces.rest.requests.CreateChallengeRequest;
 import com.codexp.challengessolutions.challenges.interfaces.rest.requests.UpdateChallengeRequest;
+import com.codexp.challengessolutions.shared.domain.model.valueobjects.UserRole;
 
 public class ChallengeCommandAssembler {
 
     public static CreateChallengeCommand toCreateChallengeCommandFromRequest(
         CreateChallengeRequest request,
-        String userId
+        String userId,
+        UserRole userRole
     ) {
         return new CreateChallengeCommand(
             ChallengeTitle.fromString(request.title()),
             ChallengeDescription.fromString(request.description()),
             AuthorId.fromString(userId),
+            userRole,
             ChallengeDifficulty.fromInt(request.difficulty()),
             RewardPoints.fromInt(request.rewardPoints())
         );
