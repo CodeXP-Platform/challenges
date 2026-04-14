@@ -1,0 +1,8 @@
+package com.codexp.challenges.challenges.domain.services;
+
+import com.codexp.challenges.challenges.domain.model.commands.AddTestCaseCommand;
+import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseId;
+
+public interface TestCaseCommandService {
+    TestCaseId handle(AddTestCaseCommand command);
+}
