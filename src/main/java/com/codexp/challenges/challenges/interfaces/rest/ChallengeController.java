@@ -12,8 +12,10 @@ import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeQu
 import com.codexp.challenges.shared.application.UserContext;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -67,14 +69,40 @@ public class ChallengeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ChallengeResponse> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(null);
+        var jwt = userContext.getPrincipal();
+
+        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(
+            id.toString(),
+            jwt.userId()
+        );
+
+        var challenge = challengeQueryService.handle(query);
+        var response = ChallengeAssembler.toResponseFromEntity(challenge);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<Page<ChallengeResponse>> findAll(
+        @RequestParam(required = false) String title,
         @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
-        return ResponseEntity.ok(null);
+        var challenges = title == null || title.isBlank()
+            ? challengeQueryService.handle(
+                ChallengeQueryAssembler.toGetAllChallengesQuery()
+            )
+            : challengeQueryService.handle(
+                ChallengeQueryAssembler.toGetChallengesByTitleQuery(title)
+            );
+
+        var responses = challenges
+            .stream()
+            .map(ChallengeAssembler::toResponseFromEntity)
+            .toList();
+
+        var pagedResponses = toPage(responses, pageable);
+
+        return ResponseEntity.ok(pagedResponses);
     }
 
     @PutMapping("/{id}")
@@ -100,7 +128,23 @@ public class ChallengeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return ResponseEntity.ok(null);
+        var jwt = userContext.getPrincipal();
+
+        if (!jwt.role().equals(UserRole.ROLE_TEACHER)) {
+            throw new UnauthorizedActionException(
+                "Only teachers can delete challenges"
+            );
+        }
+
+        var command =
+            ChallengeCommandAssembler.toDeleteChallengeCommandFromRequest(
+                id.toString(),
+                jwt.userId().value()
+            );
+
+        challengeCommandService.handle(command);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/solutions")
@@ -121,5 +165,19 @@ public class ChallengeController {
         }
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    private static Page<ChallengeResponse> toPage(
+        List<ChallengeResponse> responses,
+        Pageable pageable
+    ) {
+        int start = Math.toIntExact(pageable.getOffset());
+
+        if (start >= responses.size()) {
+            return new PageImpl<>(List.of(), pageable, responses.size());
+        }
+
+        int end = Math.min(start + pageable.getPageSize(), responses.size());
+        return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
 }
