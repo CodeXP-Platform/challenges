@@ -159,6 +159,7 @@ public class ChallengeController {
                 "Only students can submit solutions"
             );
         }
+        // TODO: Implement the logic to emmit an evento to create a solution for the current user.
 
         if (id == null || request == null) {
             throw new IllegalArgumentException("Invalid solution payload");

@@ -24,17 +24,25 @@ public class ChallengeQueryServiceImpl implements ChallengeQueryService {
 
     @Override
     public List<Challenge> handle(GetAllChallengesQuery query) {
-        return List.of();
+        return challengeRepository.findAll();
     }
 
     @Override
     public List<Challenge> handle(GetChallengesByTitleQuery query) {
-        return List.of();
+        var normalizedTitle = query.challengeTitle().value().trim().toLowerCase();
+
+        return challengeRepository
+            .findAll()
+            .stream()
+            .filter(challenge ->
+                challenge.getTitle().value().toLowerCase().contains(normalizedTitle)
+            )
+            .toList();
     }
 
     @Override
     public boolean handle(ExistsChallengeByIdQuery query) {
-        return false;
+        return challengeRepository.existsById(query.challengeId());
     }
 
     @Override

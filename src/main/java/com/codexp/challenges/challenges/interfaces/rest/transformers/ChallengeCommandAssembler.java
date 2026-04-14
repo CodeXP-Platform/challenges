@@ -1,6 +1,7 @@
 package com.codexp.challenges.challenges.interfaces.rest.transformers;
 
 import com.codexp.challenges.challenges.domain.model.commands.CreateChallengeCommand;
+import com.codexp.challenges.challenges.domain.model.commands.DeleteChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.UpdateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.valueobjects.*;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
@@ -40,6 +41,16 @@ public class ChallengeCommandAssembler {
             toOptionalDescription(request.description()),
             toOptionalDifficulty(request.difficulty()),
             toOptionalRewardPoints(request.rewardPoints())
+        );
+    }
+
+    public static DeleteChallengeCommand toDeleteChallengeCommandFromRequest(
+        String challengeId,
+        String userId
+    ) {
+        return new DeleteChallengeCommand(
+            AuthorId.fromString(userId),
+            ChallengeId.fromString(challengeId)
         );
     }
 
