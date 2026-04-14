@@ -6,14 +6,12 @@ import com.codexp.challenges.challenges.domain.model.queries.ExistsChallengeById
 import com.codexp.challenges.challenges.domain.model.queries.GetAllChallengesQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengeByIdQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitleQuery;
-import com.codexp.challenges.challenges.domain.model.valueobjects.AuthorId;
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ChallengeQueryServiceImpl implements ChallengeQueryService {

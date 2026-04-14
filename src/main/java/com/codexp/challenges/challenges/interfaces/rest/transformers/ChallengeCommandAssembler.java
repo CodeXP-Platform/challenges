@@ -7,6 +7,7 @@ import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallenge
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserId;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
+import java.util.Optional;
 
 public class ChallengeCommandAssembler {
 
@@ -32,11 +33,45 @@ public class ChallengeCommandAssembler {
     ) {
         return new UpdateChallengeCommand(
             ChallengeId.fromString(challengeId),
-            ChallengeTitle.fromString(request.title()),
-            ChallengeDescription.fromString(request.description()),
             AuthorId.fromString(userId),
-            ChallengeDifficulty.fromInt(request.difficulty()),
-            RewardPoints.fromInt(request.rewardPoints())
+            toOptionalTitle(request.title()),
+            toOptionalDescription(request.description()),
+            toOptionalDifficulty(request.difficulty()),
+            toOptionalRewardPoints(request.rewardPoints())
         );
+    }
+
+    private static Optional<ChallengeTitle> toOptionalTitle(String title) {
+        if (title == null) {
+            return Optional.empty();
+        }
+        return Optional.of(ChallengeTitle.fromString(title));
+    }
+
+    private static Optional<ChallengeDescription> toOptionalDescription(
+        String description
+    ) {
+        if (description == null) {
+            return Optional.empty();
+        }
+        return Optional.of(ChallengeDescription.fromString(description));
+    }
+
+    private static Optional<ChallengeDifficulty> toOptionalDifficulty(
+        Integer difficulty
+    ) {
+        if (difficulty == null) {
+            return Optional.empty();
+        }
+        return Optional.of(ChallengeDifficulty.fromInt(difficulty));
+    }
+
+    private static Optional<RewardPoints> toOptionalRewardPoints(
+        Integer rewardPoints
+    ) {
+        if (rewardPoints == null) {
+            return Optional.empty();
+        }
+        return Optional.of(RewardPoints.fromInt(rewardPoints));
     }
 }
