@@ -25,7 +25,7 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
     @Override
     public ChallengeId handle(CreateChallengeCommand command) {
 
-        if (command.authorRole().equals(UserRole.ROLE_STUDENT)) {
+        if (!command.authorRole().equals(UserRole.ROLE_TEACHER)) {
             throw new UnauthorizedActionException("Only teachers can create challenges");
         }
 
@@ -47,6 +47,10 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
     @Override
     public Challenge handle(UpdateChallengeCommand command) {
+        if (!command.authorRole().equals(UserRole.ROLE_TEACHER)) {
+            throw new UnauthorizedActionException("Only teachers can update challenges");
+        }
+
         if (!command.hasChanges()) {
             throw new IllegalArgumentException(
                 "At least one challenge field must be provided for update"

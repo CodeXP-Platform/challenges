@@ -2,6 +2,7 @@ package com.codexp.challenges.challenges.interfaces.rest;
 
 import com.codexp.challenges.challenges.domain.services.ChallengeCommandService;
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
+import com.codexp.challenges.challenges.interfaces.rest.requests.CreateSolutionRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.responses.ChallengeResponse;
@@ -9,6 +10,8 @@ import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeAs
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeCommandAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeQueryAssembler;
 import com.codexp.challenges.shared.application.UserContext;
+import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
+import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -85,6 +88,7 @@ public class ChallengeController {
             ChallengeCommandAssembler.toUpdateChallengeCommandFromRequest(
                 request,
                 jwt.userId().value(),
+                jwt.role(),
                 id.toString()
             );
 
@@ -97,5 +101,25 @@ public class ChallengeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/{id}/solutions")
+    public ResponseEntity<Void> createSolution(
+        @PathVariable UUID id,
+        @RequestBody CreateSolutionRequest request
+    ) {
+        var jwt = userContext.getPrincipal();
+
+        if (!jwt.role().equals(UserRole.ROLE_STUDENT)) {
+            throw new UnauthorizedActionException(
+                "Only students can submit solutions"
+            );
+        }
+
+        if (id == null || request == null) {
+            throw new IllegalArgumentException("Invalid solution payload");
+        }
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

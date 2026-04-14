@@ -29,11 +29,13 @@ public class ChallengeCommandAssembler {
     public static UpdateChallengeCommand toUpdateChallengeCommandFromRequest(
         UpdateChallengeRequest request,
         String userId,
+        UserRole userRole,
         String challengeId
     ) {
         return new UpdateChallengeCommand(
             ChallengeId.fromString(challengeId),
             AuthorId.fromString(userId),
+            userRole,
             toOptionalTitle(request.title()),
             toOptionalDescription(request.description()),
             toOptionalDifficulty(request.difficulty()),
