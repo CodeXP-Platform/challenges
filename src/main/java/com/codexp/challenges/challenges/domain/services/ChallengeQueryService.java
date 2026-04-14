@@ -7,7 +7,6 @@ import com.codexp.challenges.challenges.domain.model.queries.GetChallengeByIdQue
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitleQuery;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Application contract for challenge read use cases.
