@@ -12,6 +12,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -66,5 +67,15 @@ public class CodeTemplate extends AbstractEntity {
 		codeTemplate.templateCode = templateCode;
 
 		return codeTemplate;
+	}
+
+	public void updatePartially(
+		Optional<EntryFunctionName> entryFunctionName,
+		Optional<TemplateLanguage> language,
+		Optional<TemplateCode> templateCode
+	) {
+		entryFunctionName.ifPresent(value -> this.entryFunctionName = value);
+		language.ifPresent(value -> this.language = value);
+		templateCode.ifPresent(value -> this.templateCode = value);
 	}
 }

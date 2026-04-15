@@ -12,6 +12,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -66,5 +67,15 @@ public class TestCase extends AbstractEntity {
 		testCase.isHidden = isHidden;
 
 		return testCase;
+	}
+
+	public void updatePartially(
+		Optional<TestCaseInput> input,
+		Optional<TestCaseExpectedOutput> expectedOutput,
+		Optional<TestCaseHidden> isHidden
+	) {
+		input.ifPresent(value -> this.input = value);
+		expectedOutput.ifPresent(value -> this.expectedOutput = value);
+		isHidden.ifPresent(value -> this.isHidden = value);
 	}
 }
