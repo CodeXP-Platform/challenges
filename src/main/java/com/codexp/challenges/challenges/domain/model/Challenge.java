@@ -65,7 +65,11 @@ public class Challenge extends AbstractEntity {
     }
 
     public boolean isPublished() {
-        return isPublished;
+        return Boolean.TRUE.equals(isPublished);
+    }
+
+    public void publish() {
+        this.isPublished = true;
     }
 
     public void updatePartially(

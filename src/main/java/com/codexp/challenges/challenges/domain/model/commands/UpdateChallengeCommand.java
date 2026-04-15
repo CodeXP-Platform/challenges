@@ -1,6 +1,7 @@
 package com.codexp.challenges.challenges.domain.model.commands;
 
 import com.codexp.challenges.challenges.domain.model.valueobjects.*;
+import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
 import java.util.Optional;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Optional;
 public record UpdateChallengeCommand(
         ChallengeId challengeId,
         AuthorId authorId,
+    UserRole authorRole,
         Optional<ChallengeTitle> title,
         Optional<ChallengeDescription> description,
         Optional<ChallengeDifficulty> difficulty,

@@ -2,6 +2,7 @@ package com.codexp.challenges.challenges.interfaces.rest;
 
 import com.codexp.challenges.challenges.domain.services.ChallengeCommandService;
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
+import com.codexp.challenges.challenges.interfaces.rest.requests.CreateSolutionRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.responses.ChallengeResponse;
@@ -9,6 +10,8 @@ import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeAs
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeCommandAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeQueryAssembler;
 import com.codexp.challenges.shared.application.UserContext;
+import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
+import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,14 +67,39 @@ public class ChallengeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ChallengeResponse> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(null);
+        var jwt = userContext.getPrincipal();
+
+        var query = ChallengeQueryAssembler.toGetChallengeByIdQuery(
+            id.toString(),
+            jwt.userId()
+        );
+
+        var challenge = challengeQueryService.handle(query);
+        var response = ChallengeAssembler.toResponseFromEntity(challenge);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<Page<ChallengeResponse>> findAll(
+        @RequestParam(required = false) String title,
         @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
-        return ResponseEntity.ok(null);
+        var challengesPage = title == null || title.isBlank()
+            ? challengeQueryService.handle(
+                ChallengeQueryAssembler.toGetAllChallengesQuery(),
+                pageable
+            )
+            : challengeQueryService.handle(
+                ChallengeQueryAssembler.toGetChallengesByTitleQuery(title),
+                pageable
+            );
+
+        var pagedResponses = challengesPage.map(
+            ChallengeAssembler::toResponseFromEntity
+        );
+
+        return ResponseEntity.ok(pagedResponses);
     }
 
     @PutMapping("/{id}")
@@ -85,7 +113,25 @@ public class ChallengeController {
             ChallengeCommandAssembler.toUpdateChallengeCommandFromRequest(
                 request,
                 jwt.userId().value(),
+                jwt.role(),
                 id.toString()
+            );
+
+        var challenge = challengeCommandService.handle(command);
+        var response = ChallengeAssembler.toResponseFromEntity(challenge);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<ChallengeResponse> publish(@PathVariable UUID id) {
+        var jwt = userContext.getPrincipal();
+
+        var command =
+            ChallengeCommandAssembler.toPublishChallengeCommandFromRequest(
+                id.toString(),
+                jwt.userId().value(),
+                jwt.role()
             );
 
         var challenge = challengeCommandService.handle(command);
@@ -96,6 +142,44 @@ public class ChallengeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        return ResponseEntity.ok(null);
+        var jwt = userContext.getPrincipal();
+
+        if (!jwt.role().equals(UserRole.ROLE_TEACHER)) {
+            throw new UnauthorizedActionException(
+                "Only teachers can delete challenges"
+            );
+        }
+
+        var command =
+            ChallengeCommandAssembler.toDeleteChallengeCommandFromRequest(
+                id.toString(),
+                jwt.userId().value()
+            );
+
+        challengeCommandService.handle(command);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/solutions")
+    public ResponseEntity<Void> createSolution(
+        @PathVariable UUID id,
+        @RequestBody CreateSolutionRequest request
+    ) {
+        userContext.getPrincipal();
+        // TODO: Implement the logic to emit an event to create a solution for the current user.
+
+        if (
+            id == null ||
+            request == null ||
+            request.language() == null ||
+            request.language().isBlank() ||
+            request.sourceCode() == null ||
+            request.sourceCode().isBlank()
+        ) {
+            throw new IllegalArgumentException("Invalid solution payload");
+        }
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }
