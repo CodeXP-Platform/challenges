@@ -9,9 +9,9 @@ import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitl
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ChallengeQueryServiceImpl implements ChallengeQueryService {
@@ -23,21 +23,21 @@ public class ChallengeQueryServiceImpl implements ChallengeQueryService {
     }
 
     @Override
-    public List<Challenge> handle(GetAllChallengesQuery query) {
-        return challengeRepository.findAll();
+    public Page<Challenge> handle(
+        GetAllChallengesQuery query,
+        Pageable pageable
+    ) {
+        return challengeRepository.findAll(pageable);
     }
 
     @Override
-    public List<Challenge> handle(GetChallengesByTitleQuery query) {
-        var normalizedTitle = query.challengeTitle().value().trim().toLowerCase();
-
+    public Page<Challenge> handle(
+        GetChallengesByTitleQuery query,
+        Pageable pageable
+    ) {
+        var normalizedTitle = query.challengeTitle().value().trim();
         return challengeRepository
-            .findAll()
-            .stream()
-            .filter(challenge ->
-                challenge.getTitle().value().toLowerCase().contains(normalizedTitle)
-            )
-            .toList();
+            .findByTitle_ValueContainingIgnoreCase(normalizedTitle, pageable);
     }
 
     @Override

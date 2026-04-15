@@ -9,18 +9,29 @@ import com.codexp.challenges.challenges.domain.model.commands.UpdateChallengeCom
 import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
 import com.codexp.challenges.challenges.domain.services.ChallengeCommandService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
+import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.CodeTemplateRepository;
+import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.TestCaseRepository;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
     private final ChallengeRepository challengeRepository;
+    private final TestCaseRepository testCaseRepository;
+    private final CodeTemplateRepository codeTemplateRepository;
 
-    public ChallengeCommandServiceImpl(ChallengeRepository challengeRepository) {
+    public ChallengeCommandServiceImpl(
+        ChallengeRepository challengeRepository,
+        TestCaseRepository testCaseRepository,
+        CodeTemplateRepository codeTemplateRepository
+    ) {
         this.challengeRepository = challengeRepository;
+        this.testCaseRepository = testCaseRepository;
+        this.codeTemplateRepository = codeTemplateRepository;
     }
 
     @Override
@@ -84,6 +95,7 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
     }
 
     @Override
+    @Transactional
     public void handle(DeleteChallengeCommand command) {
         var challenge = challengeRepository
             .findById(command.challengeId())
@@ -96,6 +108,8 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
         }
         // TODO: Add a validation to allow ROLE_ADMIN to delete any challenge, regardless of ownership
 
+        testCaseRepository.deleteByChallengeId(command.challengeId());
+        codeTemplateRepository.deleteByChallengeId(command.challengeId());
         challengeRepository.delete(challenge);
     }
 }
