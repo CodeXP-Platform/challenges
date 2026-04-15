@@ -12,4 +12,6 @@ import java.util.List;
 public interface CodeTemplateRepository
     extends JpaRepository<CodeTemplate, CodeTemplateId> {
     List<CodeTemplate> findByChallengeId(ChallengeId challengeId);
+
+    void deleteByChallengeId(ChallengeId challengeId);
 }

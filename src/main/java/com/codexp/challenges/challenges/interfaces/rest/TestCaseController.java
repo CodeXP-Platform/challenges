@@ -4,6 +4,7 @@ import com.codexp.challenges.challenges.domain.exceptions.TestCaseNotFoundExcept
 import com.codexp.challenges.challenges.domain.services.TestCaseCommandService;
 import com.codexp.challenges.challenges.domain.services.TestCaseQueryService;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateTestCaseRequest;
+import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateTestCaseRequest;
 import com.codexp.challenges.challenges.interfaces.rest.responses.TestCaseResponse;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.TestCaseAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.TestCaseCommandAssembler;
@@ -88,5 +89,53 @@ public class TestCaseController {
             .toList();
 
         return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TestCaseResponse> updatePartial(
+        @PathVariable UUID challengeId,
+        @PathVariable UUID id,
+        @RequestBody UpdateTestCaseRequest request
+    ) {
+        assertTestCaseBelongsToChallenge(challengeId, id);
+
+        var jwt = userContext.getPrincipal();
+        var command = TestCaseCommandAssembler.toUpdateTestCaseCommandFromRequest(
+            request,
+            id.toString(),
+            jwt.userId(),
+            jwt.role()
+        );
+
+        var updatedTestCase = testCaseCommandService.handle(command);
+        var response = TestCaseAssembler.toResponseFromEntity(updatedTestCase);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+        @PathVariable UUID challengeId,
+        @PathVariable UUID id
+    ) {
+        assertTestCaseBelongsToChallenge(challengeId, id);
+
+        var jwt = userContext.getPrincipal();
+        var command = TestCaseCommandAssembler.toDeleteTestCaseCommandFromRequest(
+            id.toString(),
+            jwt.userId(),
+            jwt.role()
+        );
+
+        testCaseCommandService.handle(command);
+        return ResponseEntity.noContent().build();
+    }
+
+    private void assertTestCaseBelongsToChallenge(UUID challengeId, UUID testCaseId) {
+        var query = TestCaseQueryAssembler.toGetTestCaseByIdQuery(testCaseId.toString());
+        var testCase = testCaseQueryService.handle(query);
+
+        if (!testCase.getChallengeId().toString().equals(challengeId.toString())) {
+            throw new TestCaseNotFoundException();
+        }
     }
 }

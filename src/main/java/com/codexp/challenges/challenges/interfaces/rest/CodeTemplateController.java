@@ -4,6 +4,7 @@ import com.codexp.challenges.challenges.domain.exceptions.CodeTemplateNotFoundEx
 import com.codexp.challenges.challenges.domain.services.CodeTemplateCommandService;
 import com.codexp.challenges.challenges.domain.services.CodeTemplateQueryService;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateCodeTemplateRequest;
+import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateCodeTemplateRequest;
 import com.codexp.challenges.challenges.interfaces.rest.responses.CodeTemplateResponse;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.CodeTemplateAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.CodeTemplateCommandAssembler;
@@ -96,5 +97,61 @@ public class CodeTemplateController {
             .toList();
 
         return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<CodeTemplateResponse> updatePartial(
+        @PathVariable UUID challengeId,
+        @PathVariable UUID id,
+        @RequestBody UpdateCodeTemplateRequest request
+    ) {
+        assertTemplateBelongsToChallenge(challengeId, id);
+
+        var jwt = userContext.getPrincipal();
+        var command =
+            CodeTemplateCommandAssembler.toUpdateCodeTemplateCommandFromRequest(
+                request,
+                id.toString(),
+                jwt.userId(),
+                jwt.role()
+            );
+
+        var updatedTemplate = codeTemplateCommandService.handle(command);
+        var response = CodeTemplateAssembler.toResponseFromEntity(updatedTemplate);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+        @PathVariable UUID challengeId,
+        @PathVariable UUID id
+    ) {
+        assertTemplateBelongsToChallenge(challengeId, id);
+
+        var jwt = userContext.getPrincipal();
+        var command =
+            CodeTemplateCommandAssembler.toDeleteCodeTemplateCommandFromRequest(
+                id.toString(),
+                jwt.userId(),
+                jwt.role()
+            );
+
+        codeTemplateCommandService.handle(command);
+        return ResponseEntity.noContent().build();
+    }
+
+    private void assertTemplateBelongsToChallenge(
+        UUID challengeId,
+        UUID codeTemplateId
+    ) {
+        var query = CodeTemplateQueryAssembler.toGetCodeTemplateByIdQuery(
+            codeTemplateId.toString()
+        );
+
+        var codeTemplate = codeTemplateQueryService.handle(query);
+        if (!codeTemplate.getChallengeId().toString().equals(challengeId.toString())) {
+            throw new CodeTemplateNotFoundException();
+        }
     }
 }

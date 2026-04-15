@@ -12,10 +12,8 @@ import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeQu
 import com.codexp.challenges.shared.application.UserContext;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -87,20 +85,19 @@ public class ChallengeController {
         @RequestParam(required = false) String title,
         @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
-        var challenges = title == null || title.isBlank()
+        var challengesPage = title == null || title.isBlank()
             ? challengeQueryService.handle(
-                ChallengeQueryAssembler.toGetAllChallengesQuery()
+                ChallengeQueryAssembler.toGetAllChallengesQuery(),
+                pageable
             )
             : challengeQueryService.handle(
-                ChallengeQueryAssembler.toGetChallengesByTitleQuery(title)
+                ChallengeQueryAssembler.toGetChallengesByTitleQuery(title),
+                pageable
             );
 
-        var responses = challenges
-            .stream()
-            .map(ChallengeAssembler::toResponseFromEntity)
-            .toList();
-
-        var pagedResponses = toPage(responses, pageable);
+        var pagedResponses = challengesPage.map(
+            ChallengeAssembler::toResponseFromEntity
+        );
 
         return ResponseEntity.ok(pagedResponses);
     }
@@ -152,33 +149,20 @@ public class ChallengeController {
         @PathVariable UUID id,
         @RequestBody CreateSolutionRequest request
     ) {
-        var jwt = userContext.getPrincipal();
+        userContext.getPrincipal();
+        // TODO: Implement the logic to emit an event to create a solution for the current user.
 
-        if (!jwt.role().equals(UserRole.ROLE_STUDENT)) {
-            throw new UnauthorizedActionException(
-                "Only students can submit solutions"
-            );
-        }
-        // TODO: Implement the logic to emmit an evento to create a solution for the current user.
-
-        if (id == null || request == null) {
+        if (
+            id == null ||
+            request == null ||
+            request.language() == null ||
+            request.language().isBlank() ||
+            request.sourceCode() == null ||
+            request.sourceCode().isBlank()
+        ) {
             throw new IllegalArgumentException("Invalid solution payload");
         }
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    }
-
-    private static Page<ChallengeResponse> toPage(
-        List<ChallengeResponse> responses,
-        Pageable pageable
-    ) {
-        int start = Math.toIntExact(pageable.getOffset());
-
-        if (start >= responses.size()) {
-            return new PageImpl<>(List.of(), pageable, responses.size());
-        }
-
-        int end = Math.min(start + pageable.getPageSize(), responses.size());
-        return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
 }

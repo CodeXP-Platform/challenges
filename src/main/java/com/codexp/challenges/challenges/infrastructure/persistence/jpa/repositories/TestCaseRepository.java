@@ -12,4 +12,6 @@ import java.util.List;
 public interface TestCaseRepository
     extends JpaRepository<TestCase, TestCaseId> {
     List<TestCase> findByChallengeId(ChallengeId challengeId);
+
+    void deleteByChallengeId(ChallengeId challengeId);
 }
