@@ -5,18 +5,18 @@ import com.codexp.challenges.challenges.domain.model.queries.ExistsChallengeById
 import com.codexp.challenges.challenges.domain.model.queries.GetAllChallengesQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengeByIdQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitleQuery;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Application contract for challenge read use cases.
  */
 public interface ChallengeQueryService {
-    List<Challenge> handle(GetAllChallengesQuery query);
+    Page<Challenge> handle(GetAllChallengesQuery query, Pageable pageable);
 
     Challenge handle(GetChallengeByIdQuery query);
 
-    List<Challenge> handle(GetChallengesByTitleQuery query);
+    Page<Challenge> handle(GetChallengesByTitleQuery query, Pageable pageable);
 
     boolean handle(ExistsChallengeByIdQuery query);
 }
