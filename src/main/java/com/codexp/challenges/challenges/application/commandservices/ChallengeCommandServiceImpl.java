@@ -91,7 +91,51 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
     @Override
     public Challenge handle(PublishChallengeCommand command) {
-        return null;
+        if (!command.authorRole().equals(UserRole.ROLE_TEACHER)) {
+            throw new UnauthorizedActionException("Only teachers can publish challenges");
+        }
+
+        var challenge = challengeRepository
+            .findById(command.challengeId())
+            .orElseThrow(ChallengeNotFoundException::new);
+
+        if (!challenge.isOwnedBy(command.authorId())) {
+            throw new UnauthorizedActionException(
+                "Only the challenge owner can publish it"
+            );
+        }
+
+        var codeTemplates = codeTemplateRepository.findByChallengeId(
+            command.challengeId()
+        );
+        if (codeTemplates.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Challenge must have at least one code template before publishing"
+            );
+        }
+
+        var allEntryFunctionNamesValid = codeTemplates
+            .stream()
+            .allMatch(template ->
+                template.getEntryFunctionName() != null &&
+                template.getEntryFunctionName().value() != null &&
+                !template.getEntryFunctionName().value().isBlank()
+            );
+        if (!allEntryFunctionNamesValid) {
+            throw new IllegalArgumentException(
+                "All code templates must define a valid entry function name before publishing"
+            );
+        }
+
+        var testCases = testCaseRepository.findByChallengeId(command.challengeId());
+        if (testCases.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Challenge must have at least one test case before publishing"
+            );
+        }
+
+        challenge.publish();
+        return challengeRepository.save(challenge);
     }
 
     @Override

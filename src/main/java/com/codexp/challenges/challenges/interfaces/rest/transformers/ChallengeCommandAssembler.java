@@ -2,6 +2,7 @@ package com.codexp.challenges.challenges.interfaces.rest.transformers;
 
 import com.codexp.challenges.challenges.domain.model.commands.CreateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.DeleteChallengeCommand;
+import com.codexp.challenges.challenges.domain.model.commands.PublishChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.UpdateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.valueobjects.*;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
@@ -51,6 +52,18 @@ public class ChallengeCommandAssembler {
         return new DeleteChallengeCommand(
             AuthorId.fromString(userId),
             ChallengeId.fromString(challengeId)
+        );
+    }
+
+    public static PublishChallengeCommand toPublishChallengeCommandFromRequest(
+        String challengeId,
+        String userId,
+        UserRole userRole
+    ) {
+        return new PublishChallengeCommand(
+            ChallengeId.fromString(challengeId),
+            AuthorId.fromString(userId),
+            userRole
         );
     }
 

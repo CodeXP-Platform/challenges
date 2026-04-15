@@ -123,6 +123,23 @@ public class ChallengeController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<ChallengeResponse> publish(@PathVariable UUID id) {
+        var jwt = userContext.getPrincipal();
+
+        var command =
+            ChallengeCommandAssembler.toPublishChallengeCommandFromRequest(
+                id.toString(),
+                jwt.userId().value(),
+                jwt.role()
+            );
+
+        var challenge = challengeCommandService.handle(command);
+        var response = ChallengeAssembler.toResponseFromEntity(challenge);
+
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         var jwt = userContext.getPrincipal();
