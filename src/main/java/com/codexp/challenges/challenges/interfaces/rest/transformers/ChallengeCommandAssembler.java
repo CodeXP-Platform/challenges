@@ -3,9 +3,11 @@ package com.codexp.challenges.challenges.interfaces.rest.transformers;
 import com.codexp.challenges.challenges.domain.model.commands.CreateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.DeleteChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.PublishChallengeCommand;
+import com.codexp.challenges.challenges.domain.model.commands.RequestSolutionCreationCommand;
 import com.codexp.challenges.challenges.domain.model.commands.UpdateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.valueobjects.*;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
+import com.codexp.challenges.challenges.interfaces.rest.requests.CreateSolutionRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserId;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
@@ -64,6 +66,20 @@ public class ChallengeCommandAssembler {
             ChallengeId.fromString(challengeId),
             AuthorId.fromString(userId),
             userRole
+        );
+    }
+
+    public static RequestSolutionCreationCommand toRequestSolutionCreationCommand(
+        String challengeId,
+        String requesterId,
+        UserRole requesterRole,
+        CreateSolutionRequest request
+    ) {
+        return new RequestSolutionCreationCommand(
+            ChallengeId.fromString(challengeId),
+            AuthorId.fromString(requesterId),
+            requesterRole,
+            TemplateLanguage.fromString(request.language())
         );
     }
 

@@ -38,6 +38,14 @@ spring:
 app:
   jwt:
     secret: ${JWT_SECRET:mysecretkey}
+  challenges:
+    internal-token: ${CHALLENGES_INTERNAL_TOKEN:changeme-internal-token}
+  messaging:
+    challenges:
+      exchange: ${CHALLENGES_EXCHANGE:challenges.solutions.exchange}
+    solutions:
+      routing-keys:
+        solution-requested: ${SOLUTIONS_ROUTING_KEY_SOLUTION_REQUESTED:challenges.solution.requested}
 
 # Eureka Config
 eureka:

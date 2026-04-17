@@ -60,6 +60,34 @@ public class Challenge extends AbstractEntity {
         return challenge;
     }
 
+    public ChallengeId getId() {
+        return id;
+    }
+
+    public ChallengeTitle getTitle() {
+        return title;
+    }
+
+    public ChallengeDescription getDescription() {
+        return description;
+    }
+
+    public AuthorId getAuthorId() {
+        return authorId;
+    }
+
+    public ChallengeDifficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public RewardPoints getRewardPoints() {
+        return rewardPoints;
+    }
+
+    public Boolean getIsPublished() {
+        return isPublished;
+    }
+
     public boolean isOwnedBy(AuthorId author) {
         return authorId.equals(author);
     }

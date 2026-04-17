@@ -78,4 +78,24 @@ public class CodeTemplate extends AbstractEntity {
 		language.ifPresent(value -> this.language = value);
 		templateCode.ifPresent(value -> this.templateCode = value);
 	}
+
+	public EntryFunctionName getEntryFunctionName() {
+		return entryFunctionName;
+	}
+
+	public CodeTemplateId getId() {
+		return id;
+	}
+
+	public ChallengeId getChallengeId() {
+		return challengeId;
+	}
+
+	public TemplateLanguage getLanguage() {
+		return language;
+	}
+
+	public TemplateCode getTemplateCode() {
+		return templateCode;
+	}
 }

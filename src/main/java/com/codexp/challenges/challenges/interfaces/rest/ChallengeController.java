@@ -6,18 +6,27 @@ import com.codexp.challenges.challenges.interfaces.rest.requests.CreateSolutionR
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.responses.ChallengeResponse;
+import com.codexp.challenges.challenges.interfaces.rest.responses.RequestSolutionAcceptedResponse;
+import com.codexp.challenges.challenges.interfaces.rest.responses.SubmitChallengeContextResponse;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeCommandAssembler;
 import com.codexp.challenges.challenges.interfaces.rest.transformers.ChallengeQueryAssembler;
+import com.codexp.challenges.challenges.interfaces.rest.transformers.CodeTemplateQueryAssembler;
+import com.codexp.challenges.challenges.interfaces.rest.transformers.TestCaseQueryAssembler;
+import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
+import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
 import com.codexp.challenges.shared.application.UserContext;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
+import com.codexp.challenges.challenges.domain.services.CodeTemplateQueryService;
+import com.codexp.challenges.challenges.domain.services.TestCaseQueryService;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,16 +35,28 @@ public class ChallengeController {
 
     private final ChallengeCommandService challengeCommandService;
     private final ChallengeQueryService challengeQueryService;
+    private final ChallengeRepository challengeRepository;
+    private final CodeTemplateQueryService codeTemplateQueryService;
+    private final TestCaseQueryService testCaseQueryService;
     private final UserContext userContext;
+    private final String internalToken;
 
     public ChallengeController(
         ChallengeCommandService challengeCommandService,
         ChallengeQueryService challengeQueryService,
-        UserContext userContext
+        ChallengeRepository challengeRepository,
+        CodeTemplateQueryService codeTemplateQueryService,
+        TestCaseQueryService testCaseQueryService,
+        UserContext userContext,
+        @Value("${app.challenges.internal-token}") String internalToken
     ) {
         this.challengeCommandService = challengeCommandService;
         this.challengeQueryService = challengeQueryService;
+        this.challengeRepository = challengeRepository;
+        this.codeTemplateQueryService = codeTemplateQueryService;
+        this.testCaseQueryService = testCaseQueryService;
         this.userContext = userContext;
+        this.internalToken = internalToken;
     }
 
     @PostMapping
@@ -162,24 +183,92 @@ public class ChallengeController {
     }
 
     @PostMapping("/{id}/solutions")
-    public ResponseEntity<Void> createSolution(
+    public ResponseEntity<RequestSolutionAcceptedResponse> createSolution(
         @PathVariable UUID id,
         @RequestBody CreateSolutionRequest request
     ) {
-        userContext.getPrincipal();
-        // TODO: Implement the logic to emit an event to create a solution for the current user.
+        var jwt = userContext.getPrincipal();
 
         if (
             id == null ||
             request == null ||
             request.language() == null ||
-            request.language().isBlank() ||
-            request.sourceCode() == null ||
-            request.sourceCode().isBlank()
+            request.language().isBlank()
         ) {
             throw new IllegalArgumentException("Invalid solution payload");
         }
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        var command = ChallengeCommandAssembler.toRequestSolutionCreationCommand(
+            id.toString(),
+            jwt.userId().value(),
+            jwt.role(),
+            request
+        );
+        challengeCommandService.handle(command);
+
+        var response = new RequestSolutionAcceptedResponse(
+            id.toString(),
+            request.language().trim().toLowerCase(),
+            "REQUESTED"
+        );
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @GetMapping("/{id}/solutions/submit-context")
+    public ResponseEntity<SubmitChallengeContextResponse> getSubmitContext(
+        @PathVariable UUID id,
+        @RequestParam String language,
+        @RequestHeader(value = "X-Internal-Token", required = false) String providedInternalToken
+    ) {
+        if (providedInternalToken == null || !providedInternalToken.equals(internalToken)) {
+            throw new UnauthorizedActionException("Invalid internal token");
+        }
+
+        var challenge = challengeRepository
+            .findById(ChallengeId.fromString(id.toString()))
+            .orElseThrow(com.codexp.challenges.challenges.domain.exceptions.ChallengeNotFoundException::new);
+        if (!challenge.isPublished()) {
+            throw new IllegalArgumentException("Challenge must be published");
+        }
+
+        var languageKey = language == null ? null : language.trim();
+        if (languageKey == null || languageKey.isEmpty()) {
+            throw new IllegalArgumentException("Language is required");
+        }
+
+        var templates = codeTemplateQueryService.handle(
+            CodeTemplateQueryAssembler.toGetCodeTemplatesByChallengeIdQuery(id.toString())
+        );
+        var selectedTemplate = templates
+            .stream()
+            .filter(template -> template.getLanguage().value().equalsIgnoreCase(languageKey))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No template found for requested language"));
+
+        var testCases = testCaseQueryService.handle(
+            TestCaseQueryAssembler.toGetTestCasesByChallengeIdQuery(id.toString())
+        );
+        if (testCases.isEmpty()) {
+            throw new IllegalArgumentException("Challenge has no test cases configured");
+        }
+
+        var response = new SubmitChallengeContextResponse(
+            selectedTemplate.getTemplateCode().toString(),
+            selectedTemplate.getLanguage().value(),
+            selectedTemplate.getEntryFunctionName().value(),
+            testCases
+                .stream()
+                .map(testCase ->
+                    new SubmitChallengeContextResponse.SubmitTestCaseResponse(
+                        testCase.getId().toString(),
+                        testCase.getInput().toString(),
+                        testCase.getExpectedOutput().toString(),
+                        testCase.getIsHidden().value()
+                    )
+                )
+                .toList()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

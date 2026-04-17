@@ -78,4 +78,24 @@ public class TestCase extends AbstractEntity {
 		expectedOutput.ifPresent(value -> this.expectedOutput = value);
 		isHidden.ifPresent(value -> this.isHidden = value);
 	}
+
+	public TestCaseId getId() {
+		return id;
+	}
+
+	public ChallengeId getChallengeId() {
+		return challengeId;
+	}
+
+	public TestCaseInput getInput() {
+		return input;
+	}
+
+	public TestCaseExpectedOutput getExpectedOutput() {
+		return expectedOutput;
+	}
+
+	public TestCaseHidden getIsHidden() {
+		return isHidden;
+	}
 }

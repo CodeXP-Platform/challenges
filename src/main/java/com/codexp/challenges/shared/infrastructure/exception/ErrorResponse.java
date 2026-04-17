@@ -1,19 +1,13 @@
 package com.codexp.challenges.shared.infrastructure.exception;
 
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 
-@Getter
-public class ErrorResponse {
-
-    private String code;
-    private String message;
-    private LocalDateTime timestamp;
-
+public record ErrorResponse(
+    String code,
+    String message,
+    LocalDateTime timestamp
+) {
     public ErrorResponse(String code, String message) {
-        this.code = code;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
+        this(code, message, LocalDateTime.now());
     }
 }

@@ -5,9 +5,12 @@ import com.codexp.challenges.challenges.domain.model.Challenge;
 import com.codexp.challenges.challenges.domain.model.commands.CreateChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.DeleteChallengeCommand;
 import com.codexp.challenges.challenges.domain.model.commands.PublishChallengeCommand;
+import com.codexp.challenges.challenges.domain.model.commands.RequestSolutionCreationCommand;
 import com.codexp.challenges.challenges.domain.model.commands.UpdateChallengeCommand;
+import com.codexp.challenges.challenges.domain.model.events.SolutionRequestedEvent;
 import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
 import com.codexp.challenges.challenges.domain.services.ChallengeCommandService;
+import com.codexp.challenges.challenges.domain.services.SolutionRequestedEventPublisher;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.CodeTemplateRepository;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.TestCaseRepository;
@@ -23,15 +26,18 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
     private final ChallengeRepository challengeRepository;
     private final TestCaseRepository testCaseRepository;
     private final CodeTemplateRepository codeTemplateRepository;
+    private final SolutionRequestedEventPublisher solutionRequestedEventPublisher;
 
     public ChallengeCommandServiceImpl(
         ChallengeRepository challengeRepository,
         TestCaseRepository testCaseRepository,
-        CodeTemplateRepository codeTemplateRepository
+        CodeTemplateRepository codeTemplateRepository,
+        SolutionRequestedEventPublisher solutionRequestedEventPublisher
     ) {
         this.challengeRepository = challengeRepository;
         this.testCaseRepository = testCaseRepository;
         this.codeTemplateRepository = codeTemplateRepository;
+        this.solutionRequestedEventPublisher = solutionRequestedEventPublisher;
     }
 
     @Override
@@ -136,6 +142,49 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
 
         challenge.publish();
         return challengeRepository.save(challenge);
+    }
+
+    @Override
+    @Transactional
+    public void handle(RequestSolutionCreationCommand command) {
+        if (
+            !command.authorRole().equals(UserRole.ROLE_STUDENT) &&
+            !command.authorRole().equals(UserRole.ROLE_ADMIN)
+        ) {
+            throw new UnauthorizedActionException(
+                "Only students or admins can request solutions"
+            );
+        }
+
+        var challenge = challengeRepository
+            .findById(command.challengeId())
+            .orElseThrow(ChallengeNotFoundException::new);
+
+        if (!challenge.isPublished()) {
+            throw new IllegalArgumentException(
+                "Challenge must be published before requesting a solution"
+            );
+        }
+
+        var codeTemplate = codeTemplateRepository
+            .findFirstByChallengeIdAndLanguage(
+                command.challengeId(),
+                command.language()
+            )
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    "No code template found for requested language"
+                )
+            );
+
+        var event = SolutionRequestedEvent.create(
+            command.challengeId().toString(),
+            command.authorId().toString(),
+            codeTemplate.getLanguage().toString(),
+            codeTemplate.getTemplateCode().toString()
+        );
+
+        solutionRequestedEventPublisher.publish(event);
     }
 
     @Override
