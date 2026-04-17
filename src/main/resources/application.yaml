@@ -7,7 +7,7 @@ spring:
 
   # PostgreSQL
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:postgres}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -37,7 +37,7 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:mysecretkey}
+    secret: ${JWT_SECRET:8x/c+pXQ3Q9m+9b2tZ/vT1gQzYqXlO/m+HwA9R5z7J8=}
   challenges:
     internal-token: ${CHALLENGES_INTERNAL_TOKEN:changeme-internal-token}
   messaging:
