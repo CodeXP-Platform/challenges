@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:8081/api/v1
+@authToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmNWM5MTU1YS1iNTZlLTRmMDAtOGM3Mi1mNTkxYmY5NDNjNzQiLCJuaWNrbmFtZSI6IlJPTEVfVEVBQ0hFUiIsImVtYWlsIjoicm9sZV90ZWFjaGVyQGV4YW1wbGUuY29tIiwicm9sZSI6IlJPTEVfVEVBQ0hFUiIsImlhdCI6MTc3NjQwMzU0NiwiZXhwIjoxNzc2NDA3MTQ2fQ.51NgoIWcUpVN9a5As323OQxAogeMuccOCPyfH_R6OLE
+
+### Crear Challenge
+# @name createChallenge
+POST {{baseUrl}}/challenges
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "title": "Suma de dos números",
+  "description": "Crea una función que reciba dos números enteros y retorne su suma.",
+  "difficulty": 1,
+  "rewardPoints": 10
+}
+
+### Definir la variable del challenge creado
+@challengeId = {{createChallenge.response.body.id}}
+
+### Crear Code Template para el Challenge
+POST {{baseUrl}}/challenges/{{challengeId}}/code-templates
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "entryFunctionName": "sum",
+  "language": "python",
+  "templateCode": "def sum(a, b):\n    # Tu código aquí\n    pass"
+}
+
+### Crear Test Case para el Challenge (Ejemplo 1)
+POST {{baseUrl}}/challenges/{{challengeId}}/test-cases
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "input": "1, 2",
+  "expectedOutput": "3",
+  "isHidden": false
+}
+
+### Crear Test Case para el Challenge (Ejemplo 2)
+POST {{baseUrl}}/challenges/{{challengeId}}/test-cases
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "input": "-1, 5",
+  "expectedOutput": "4",
+  "isHidden": true
+}
+
+### Publicar Challenge
+PATCH {{baseUrl}}/challenges/{{challengeId}}/publish
+Authorization: {{authToken}}
+
