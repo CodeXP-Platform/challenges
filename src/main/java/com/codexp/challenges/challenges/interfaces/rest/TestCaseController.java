@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/challenges/{challengeId}/test-cases")
+@RequestMapping("/api/v1/challenges/{challengeId}/code-templates/{codeTemplateId}/test-cases")
 public class TestCaseController {
 
     private final TestCaseCommandService testCaseCommandService;
@@ -37,13 +37,14 @@ public class TestCaseController {
     @PostMapping
     public ResponseEntity<TestCaseResponse> create(
         @PathVariable UUID challengeId,
+        @PathVariable UUID codeTemplateId,
         @RequestBody CreateTestCaseRequest request
     ) {
         var jwt = userContext.getPrincipal();
 
         var command = TestCaseCommandAssembler.toAddTestCaseCommandFromRequest(
             request,
-            challengeId.toString(),
+            codeTemplateId.toString(),
             jwt.userId(),
             jwt.role()
         );
@@ -60,12 +61,13 @@ public class TestCaseController {
     @GetMapping("/{id}")
     public ResponseEntity<TestCaseResponse> findById(
         @PathVariable UUID challengeId,
+        @PathVariable UUID codeTemplateId,
         @PathVariable UUID id
     ) {
         var query = TestCaseQueryAssembler.toGetTestCaseByIdQuery(id.toString());
         var testCase = testCaseQueryService.handle(query);
 
-        if (!testCase.getChallengeId().toString().equals(challengeId.toString())) {
+        if (!testCase.getCodeTemplateId().toString().equals(codeTemplateId.toString())) {
             throw new TestCaseNotFoundException();
         }
 
@@ -74,11 +76,12 @@ public class TestCaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TestCaseResponse>> findByChallengeId(
-        @PathVariable UUID challengeId
+    public ResponseEntity<List<TestCaseResponse>> findByCodeTemplateId(
+        @PathVariable UUID challengeId,
+        @PathVariable UUID codeTemplateId
     ) {
-        var query = TestCaseQueryAssembler.toGetTestCasesByChallengeIdQuery(
-            challengeId.toString()
+        var query = TestCaseQueryAssembler.toGetTestCasesByCodeTemplateIdQuery(
+            codeTemplateId.toString()
         );
 
         var testCases = testCaseQueryService.handle(query);
@@ -94,10 +97,11 @@ public class TestCaseController {
     @PatchMapping("/{id}")
     public ResponseEntity<TestCaseResponse> updatePartial(
         @PathVariable UUID challengeId,
+        @PathVariable UUID codeTemplateId,
         @PathVariable UUID id,
         @RequestBody UpdateTestCaseRequest request
     ) {
-        assertTestCaseBelongsToChallenge(challengeId, id);
+        assertTestCaseBelongsToCodeTemplate(codeTemplateId, id);
 
         var jwt = userContext.getPrincipal();
         var command = TestCaseCommandAssembler.toUpdateTestCaseCommandFromRequest(
@@ -115,9 +119,10 @@ public class TestCaseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
         @PathVariable UUID challengeId,
+        @PathVariable UUID codeTemplateId,
         @PathVariable UUID id
     ) {
-        assertTestCaseBelongsToChallenge(challengeId, id);
+        assertTestCaseBelongsToCodeTemplate(codeTemplateId, id);
 
         var jwt = userContext.getPrincipal();
         var command = TestCaseCommandAssembler.toDeleteTestCaseCommandFromRequest(
@@ -130,11 +135,11 @@ public class TestCaseController {
         return ResponseEntity.noContent().build();
     }
 
-    private void assertTestCaseBelongsToChallenge(UUID challengeId, UUID testCaseId) {
+    private void assertTestCaseBelongsToCodeTemplate(UUID codeTemplateId, UUID testCaseId) {
         var query = TestCaseQueryAssembler.toGetTestCaseByIdQuery(testCaseId.toString());
         var testCase = testCaseQueryService.handle(query);
 
-        if (!testCase.getChallengeId().toString().equals(challengeId.toString())) {
+        if (!testCase.getCodeTemplateId().toString().equals(codeTemplateId.toString())) {
             throw new TestCaseNotFoundException();
         }
     }

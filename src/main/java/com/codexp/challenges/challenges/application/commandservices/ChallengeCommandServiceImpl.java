@@ -133,8 +133,14 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
             );
         }
 
-        var testCases = testCaseRepository.findByChallengeId(command.challengeId());
-        if (testCases.isEmpty()) {
+        boolean hasTestCases = false;
+        for (var template : codeTemplates) {
+            if (!testCaseRepository.findByCodeTemplateId(template.getId()).isEmpty()) {
+                hasTestCases = true;
+                break;
+            }
+        }
+        if (!hasTestCases) {
             throw new IllegalArgumentException(
                 "Challenge must have at least one test case before publishing"
             );
@@ -201,7 +207,10 @@ public class ChallengeCommandServiceImpl implements ChallengeCommandService {
         }
         // TODO: Add a validation to allow ROLE_ADMIN to delete any challenge, regardless of ownership
 
-        testCaseRepository.deleteByChallengeId(command.challengeId());
+        var codeTemplatesForDelete = codeTemplateRepository.findByChallengeId(command.challengeId());
+        for (var template : codeTemplatesForDelete) {
+            testCaseRepository.deleteByCodeTemplateId(template.getId());
+        }
         codeTemplateRepository.deleteByChallengeId(command.challengeId());
         challengeRepository.delete(challenge);
     }

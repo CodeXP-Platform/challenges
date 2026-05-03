@@ -246,7 +246,7 @@ public class ChallengeController {
             .orElseThrow(() -> new IllegalArgumentException("No template found for requested language"));
 
         var testCases = testCaseQueryService.handle(
-            TestCaseQueryAssembler.toGetTestCasesByChallengeIdQuery(id.toString())
+            TestCaseQueryAssembler.toGetTestCasesByCodeTemplateIdQuery(selectedTemplate.getId().value().toString())
         );
         if (testCases.isEmpty()) {
             throw new IllegalArgumentException("Challenge has no test cases configured");

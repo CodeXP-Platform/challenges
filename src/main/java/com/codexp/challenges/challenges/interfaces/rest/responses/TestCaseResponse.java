@@ -4,7 +4,7 @@ import java.time.Instant;
 
 public record TestCaseResponse(
     String testCaseId,
-    String challengeId,
+    String codeTemplateId,
     String input,
     String expectedOutput,
     Boolean isHidden,
