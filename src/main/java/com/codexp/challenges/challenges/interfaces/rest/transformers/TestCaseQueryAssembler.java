@@ -1,8 +1,8 @@
 package com.codexp.challenges.challenges.interfaces.rest.transformers;
 
 import com.codexp.challenges.challenges.domain.model.queries.GetTestCaseByIdQuery;
-import com.codexp.challenges.challenges.domain.model.queries.GetTestCasesByChallengeIdQuery;
-import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
+import com.codexp.challenges.challenges.domain.model.queries.GetTestCasesByCodeTemplateIdQuery;
+import com.codexp.challenges.challenges.domain.model.valueobjects.CodeTemplateId;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseId;
 
 public class TestCaseQueryAssembler {
@@ -17,15 +17,15 @@ public class TestCaseQueryAssembler {
         return new GetTestCaseByIdQuery(testCaseId);
     }
 
-    public static GetTestCasesByChallengeIdQuery toGetTestCasesByChallengeIdQuery(
-        String challengeId
+    public static GetTestCasesByCodeTemplateIdQuery toGetTestCasesByCodeTemplateIdQuery(
+        String codeTemplateId
     ) {
-        return new GetTestCasesByChallengeIdQuery(ChallengeId.fromString(challengeId));
+        return new GetTestCasesByCodeTemplateIdQuery(CodeTemplateId.fromString(codeTemplateId));
     }
 
-    public static GetTestCasesByChallengeIdQuery toGetTestCasesByChallengeIdQuery(
-        ChallengeId challengeId
+    public static GetTestCasesByCodeTemplateIdQuery toGetTestCasesByCodeTemplateIdQuery(
+        CodeTemplateId codeTemplateId
     ) {
-        return new GetTestCasesByChallengeIdQuery(challengeId);
+        return new GetTestCasesByCodeTemplateIdQuery(codeTemplateId);
     }
 }

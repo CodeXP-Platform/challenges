@@ -1,6 +1,6 @@
 package com.codexp.challenges.challenges.domain.model;
 
-import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
+import com.codexp.challenges.challenges.domain.model.valueobjects.CodeTemplateId;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseExpectedOutput;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseHidden;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseId;
@@ -31,7 +31,7 @@ public class TestCase extends AbstractEntity {
 
 	@Embedded
 	@AttributeOverride(name = "value", column = @Column(name = "challenge_id", nullable = false))
-	private ChallengeId challengeId;
+	private CodeTemplateId codeTemplateId;
 
 	@Embedded
 	@AttributeOverride(
@@ -53,7 +53,7 @@ public class TestCase extends AbstractEntity {
 
 	public static TestCase create(
 		TestCaseId id,
-		ChallengeId challengeId,
+		CodeTemplateId codeTemplateId,
 		TestCaseInput input,
 		TestCaseExpectedOutput expectedOutput,
 		TestCaseHidden isHidden
@@ -61,7 +61,7 @@ public class TestCase extends AbstractEntity {
 		TestCase testCase = new TestCase();
 
 		testCase.id = id;
-		testCase.challengeId = challengeId;
+		testCase.codeTemplateId = codeTemplateId;
 		testCase.input = input;
 		testCase.expectedOutput = expectedOutput;
 		testCase.isHidden = isHidden;
@@ -83,8 +83,8 @@ public class TestCase extends AbstractEntity {
 		return id;
 	}
 
-	public ChallengeId getChallengeId() {
-		return challengeId;
+	public CodeTemplateId getCodeTemplateId() {
+		return codeTemplateId;
 	}
 
 	public TestCaseInput getInput() {

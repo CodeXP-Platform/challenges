@@ -9,6 +9,7 @@ import com.codexp.challenges.challenges.domain.model.commands.UpdateTestCaseComm
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseId;
 import com.codexp.challenges.challenges.domain.services.TestCaseCommandService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
+import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.CodeTemplateRepository;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.TestCaseRepository;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserRole;
@@ -19,13 +20,16 @@ public class TestCaseCommandServiceImpl implements TestCaseCommandService {
 
     private final TestCaseRepository testCaseRepository;
     private final ChallengeRepository challengeRepository;
+    private final CodeTemplateRepository codeTemplateRepository;
 
     public TestCaseCommandServiceImpl(
         TestCaseRepository testCaseRepository,
-        ChallengeRepository challengeRepository
+        ChallengeRepository challengeRepository,
+        CodeTemplateRepository codeTemplateRepository
     ) {
         this.testCaseRepository = testCaseRepository;
         this.challengeRepository = challengeRepository;
+        this.codeTemplateRepository = codeTemplateRepository;
     }
 
     @Override
@@ -36,8 +40,12 @@ public class TestCaseCommandServiceImpl implements TestCaseCommandService {
             );
         }
 
+        var codeTemplate = codeTemplateRepository
+            .findById(command.codeTemplateId())
+            .orElseThrow(() -> new IllegalArgumentException("Code Template not found"));
+            
         var challenge = challengeRepository
-            .findById(command.challengeId())
+            .findById(codeTemplate.getChallengeId())
             .orElseThrow(ChallengeNotFoundException::new);
 
         if (!challenge.isOwnedBy(command.authorId())) {
@@ -50,7 +58,7 @@ public class TestCaseCommandServiceImpl implements TestCaseCommandService {
 
         var testCase = TestCase.create(
             testCaseId,
-            command.challengeId(),
+            command.codeTemplateId(),
             command.input(),
             command.expectedOutput(),
             command.isHidden()
@@ -79,8 +87,12 @@ public class TestCaseCommandServiceImpl implements TestCaseCommandService {
             .findById(command.testCaseId())
             .orElseThrow(TestCaseNotFoundException::new);
 
+        var codeTemplate = codeTemplateRepository
+            .findById(testCase.getCodeTemplateId())
+            .orElseThrow(() -> new IllegalArgumentException("Code Template not found"));
+            
         var challenge = challengeRepository
-            .findById(testCase.getChallengeId())
+            .findById(codeTemplate.getChallengeId())
             .orElseThrow(ChallengeNotFoundException::new);
 
         if (!challenge.isOwnedBy(command.authorId())) {
@@ -110,8 +122,12 @@ public class TestCaseCommandServiceImpl implements TestCaseCommandService {
             .findById(command.testCaseId())
             .orElseThrow(TestCaseNotFoundException::new);
 
+        var codeTemplate = codeTemplateRepository
+            .findById(testCase.getCodeTemplateId())
+            .orElseThrow(() -> new IllegalArgumentException("Code Template not found"));
+            
         var challenge = challengeRepository
-            .findById(testCase.getChallengeId())
+            .findById(codeTemplate.getChallengeId())
             .orElseThrow(ChallengeNotFoundException::new);
 
         if (!challenge.isOwnedBy(command.authorId())) {

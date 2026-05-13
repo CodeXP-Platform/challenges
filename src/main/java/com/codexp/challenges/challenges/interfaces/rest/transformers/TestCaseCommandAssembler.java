@@ -4,7 +4,7 @@ import com.codexp.challenges.challenges.domain.model.commands.AddTestCaseCommand
 import com.codexp.challenges.challenges.domain.model.commands.DeleteTestCaseCommand;
 import com.codexp.challenges.challenges.domain.model.commands.UpdateTestCaseCommand;
 import com.codexp.challenges.challenges.domain.model.valueobjects.AuthorId;
-import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
+import com.codexp.challenges.challenges.domain.model.valueobjects.CodeTemplateId;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseExpectedOutput;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseHidden;
 import com.codexp.challenges.challenges.domain.model.valueobjects.TestCaseId;
@@ -19,14 +19,14 @@ public class TestCaseCommandAssembler {
 
     public static AddTestCaseCommand toAddTestCaseCommandFromRequest(
         CreateTestCaseRequest request,
-        String challengeId,
+        String codeTemplateId,
         UserId userId,
         UserRole userRole
     ) {
         return new AddTestCaseCommand(
             AuthorId.fromUserId(userId),
             userRole,
-            ChallengeId.fromString(challengeId),
+            CodeTemplateId.fromString(codeTemplateId),
             TestCaseInput.fromString(request.input()),
             TestCaseExpectedOutput.fromString(request.expectedOutput()),
             TestCaseHidden.fromBoolean(request.isHidden())

@@ -4,7 +4,7 @@ import com.codexp.challenges.challenges.domain.exceptions.TestCaseNotFoundExcept
 import com.codexp.challenges.challenges.domain.model.TestCase;
 import com.codexp.challenges.challenges.domain.model.queries.ExistsTestCaseByIdQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetTestCaseByIdQuery;
-import com.codexp.challenges.challenges.domain.model.queries.GetTestCasesByChallengeIdQuery;
+import com.codexp.challenges.challenges.domain.model.queries.GetTestCasesByCodeTemplateIdQuery;
 import com.codexp.challenges.challenges.domain.services.TestCaseQueryService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.TestCaseRepository;
 import org.springframework.stereotype.Service;
@@ -28,8 +28,8 @@ public class TestCaseQueryServiceImpl implements TestCaseQueryService {
     }
 
     @Override
-    public List<TestCase> handle(GetTestCasesByChallengeIdQuery query) {
-        return testCaseRepository.findByChallengeId(query.challengeId());
+    public List<TestCase> handle(GetTestCasesByCodeTemplateIdQuery query) {
+        return testCaseRepository.findByCodeTemplateId(query.codeTemplateId());
     }
 
     @Override
