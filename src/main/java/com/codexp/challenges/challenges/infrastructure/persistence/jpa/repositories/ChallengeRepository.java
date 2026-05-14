@@ -14,4 +14,7 @@ public interface ChallengeRepository
         String title,
         Pageable pageable
     );
+
+
+    Page<Challenge> findAllByIsPublishedTrue(Boolean isPublished, Pageable pageable);
 }

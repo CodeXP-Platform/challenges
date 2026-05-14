@@ -24,10 +24,10 @@ public class ChallengeQueryServiceImpl implements ChallengeQueryService {
 
     @Override
     public Page<Challenge> handle(
-        GetAllChallengesQuery query,
-        Pageable pageable
+            GetAllChallengesQuery query,
+            Pageable pageable
     ) {
-        return challengeRepository.findAll(pageable);
+        return challengeRepository.findAllByIsPublishedTrue(true, pageable);
     }
 
     @Override
@@ -63,6 +63,6 @@ public class ChallengeQueryServiceImpl implements ChallengeQueryService {
             return challenge;
         }
 
-        throw new UnauthorizedActionException("Cannot access to this resource");
+        throw new UnauthorizedActionException("This challenge is not published or your are not the owner.");
     }
 }
