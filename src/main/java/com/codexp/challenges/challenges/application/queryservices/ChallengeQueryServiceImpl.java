@@ -6,10 +6,12 @@ import com.codexp.challenges.challenges.domain.model.queries.ExistsChallengeById
 import com.codexp.challenges.challenges.domain.model.queries.GetAllChallengesQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengeByIdQuery;
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitleQuery;
+import com.codexp.challenges.challenges.domain.model.queries.FindChallengesQuery;
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
 import com.codexp.challenges.challenges.infrastructure.persistence.jpa.repositories.ChallengeRepository;
 import com.codexp.challenges.shared.domain.exceptions.UnauthorizedActionException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +37,27 @@ public class ChallengeQueryServiceImpl implements ChallengeQueryService {
         GetChallengesByTitleQuery query,
         Pageable pageable
     ) {
-        var normalizedTitle = query.challengeTitle().value().trim();
-        return challengeRepository
-            .findByTitle_ValueContainingIgnoreCase(normalizedTitle, pageable);
+        return challengeRepository.findPublishedByFilters(
+            query.title(), null, null, null, withoutSort(pageable)
+        );
+    }
+
+    @Override
+    public Page<Challenge> handle(FindChallengesQuery query, Pageable pageable) {
+        return challengeRepository.findPublishedByFilters(
+            query.title(),
+            query.minDifficulty(),
+            query.maxDifficulty(),
+            query.language(),
+            withoutSort(pageable)
+        );
+    }
+
+    // The native filter query carries its own ORDER BY (created_at). Strip the
+    // Pageable sort so Spring doesn't append entity property names (e.g. "createdAt")
+    // as raw column names to the native SQL.
+    private static Pageable withoutSort(Pageable pageable) {
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.codexp.challenges.challenges.interfaces.rest;
 
 import com.codexp.challenges.challenges.domain.services.ChallengeCommandService;
 import com.codexp.challenges.challenges.domain.services.ChallengeQueryService;
+import com.codexp.challenges.challenges.domain.model.queries.FindChallengesQuery;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateSolutionRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.CreateChallengeRequest;
 import com.codexp.challenges.challenges.interfaces.rest.requests.UpdateChallengeRequest;
@@ -104,22 +105,13 @@ public class ChallengeController {
     @GetMapping
     public ResponseEntity<Page<ChallengeResponse>> findAll(
         @RequestParam(required = false) String title,
+        @RequestParam(required = false) String difficulty,
+        @RequestParam(required = false) String language,
         @PageableDefault(size = 10, sort = "createdAt") Pageable pageable
     ) {
-        var challengesPage = title == null || title.isBlank()
-            ? challengeQueryService.handle(
-                ChallengeQueryAssembler.toGetAllChallengesQuery(),
-                pageable
-            )
-            : challengeQueryService.handle(
-                ChallengeQueryAssembler.toGetChallengesByTitleQuery(title),
-                pageable
-            );
-
-        var pagedResponses = challengesPage.map(
-            ChallengeAssembler::toResponseFromEntity
-        );
-
+        var query = FindChallengesQuery.of(title, difficulty, language);
+        var pagedResponses = challengeQueryService.handle(query, pageable)
+            .map(ChallengeAssembler::toResponseFromEntity);
         return ResponseEntity.ok(pagedResponses);
     }
 
