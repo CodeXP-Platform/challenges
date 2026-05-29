@@ -5,7 +5,6 @@ import com.codexp.challenges.challenges.domain.model.queries.GetAllChallengesQue
 import com.codexp.challenges.challenges.domain.model.queries.GetChallengesByTitleQuery;
 import com.codexp.challenges.challenges.domain.model.valueobjects.AuthorId;
 import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeId;
-import com.codexp.challenges.challenges.domain.model.valueobjects.ChallengeTitle;
 import com.codexp.challenges.shared.domain.model.valueobjects.UserId;
 
 public class ChallengeQueryAssembler {
@@ -33,6 +32,6 @@ public class ChallengeQueryAssembler {
     public static GetChallengesByTitleQuery toGetChallengesByTitleQuery(
         String title
     ) {
-        return new GetChallengesByTitleQuery(ChallengeTitle.fromString(title));
+        return new GetChallengesByTitleQuery(title.trim());
     }
 }
